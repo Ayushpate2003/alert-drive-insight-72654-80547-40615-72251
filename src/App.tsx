@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Navbar } from "@/components/Navbar";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -23,6 +24,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Navbar />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
@@ -36,7 +38,7 @@ const App = () => (
               }
             />
             <Route
-              path="/fleet"
+              path="/fleet-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['fleet_manager']}>
                   <FleetDashboard />
@@ -44,7 +46,7 @@ const App = () => (
               }
             />
             <Route
-              path="/admin"
+              path="/admin-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AdminDashboard />
