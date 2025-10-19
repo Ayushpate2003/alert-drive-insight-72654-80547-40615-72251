@@ -4,15 +4,26 @@ import { RAGAdvicePanel } from '@/components/RAGAdvicePanel';
 import { CameraPreview } from '@/components/CameraPreview';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { useSimulatedData } from '@/hooks/useSimulatedData';
-import { Activity } from 'lucide-react';
+import { Activity, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
-const Index = () => {
+const Dashboard = () => {
   const { driverStatus, metricsHistory, recommendations } = useSimulatedData();
 
   return (
     <div className="min-h-screen bg-background dark p-4 md:p-6">
       {/* Header */}
-      <header className="mb-6 flex items-center justify-between">
+      <header className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/" className="gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </Link>
+          </Button>
+          <ConnectionStatus isConnected={false} />
+        </div>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/20">
             <Activity className="w-6 h-6 text-primary" />
@@ -26,7 +37,6 @@ const Index = () => {
             </p>
           </div>
         </div>
-        <ConnectionStatus isConnected={false} />
       </header>
 
       {/* Main Grid */}
@@ -61,4 +71,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Dashboard;
