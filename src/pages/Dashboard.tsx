@@ -3,6 +3,8 @@ import { LiveMetricsChart } from '@/components/LiveMetricsChart';
 import { RAGAdvicePanel } from '@/components/RAGAdvicePanel';
 import { CameraPreview } from '@/components/CameraPreview';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { TripHistoryPanel } from '@/components/TripHistoryPanel';
+import { ProfileSection } from '@/components/ProfileSection';
 import { useSimulatedData } from '@/hooks/useSimulatedData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Activity, ArrowLeft, LogOut } from 'lucide-react';
@@ -53,27 +55,15 @@ const Dashboard = () => {
         <div className="lg:col-span-2 space-y-4 md:space-y-6">
           <DriverStatusCard status={driverStatus} />
           <LiveMetricsChart data={metricsHistory} />
+          <TripHistoryPanel />
           <CameraPreview isActive={true} />
         </div>
 
-        {/* Right Column - RAG Advice */}
-        <div className="lg:col-span-1">
+        {/* Right Column - Sidebar */}
+        <div className="lg:col-span-1 space-y-4 md:space-y-6">
+          <ProfileSection />
           <RAGAdvicePanel recommendations={recommendations} />
         </div>
-      </div>
-
-      {/* Backend Connection Info */}
-      <div className="mt-6 p-4 rounded-lg bg-secondary border border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-2">Backend Configuration</h3>
-        <p className="text-xs text-muted-foreground mb-2">
-          Currently running in simulation mode. Connect to your Node.js backend:
-        </p>
-        <code className="text-xs bg-card px-2 py-1 rounded text-primary block">
-          WebSocket: ws://your-backend-url/ws/live
-        </code>
-        <code className="text-xs bg-card px-2 py-1 rounded text-primary block mt-1">
-          REST API: https://your-backend-url/api/v1/
-        </code>
       </div>
     </div>
   );

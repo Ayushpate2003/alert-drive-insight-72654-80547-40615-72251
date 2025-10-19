@@ -1,26 +1,47 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { FleetAnalyticsChart } from '@/components/FleetAnalyticsChart';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Users, AlertTriangle, TrendingUp, LogOut } from 'lucide-react';
+import { useFleetData } from '@/hooks/useFleetData';
+import { 
+  ArrowLeft, 
+  Users, 
+  AlertTriangle, 
+  TrendingUp, 
+  LogOut, 
+  Search,
+  Download,
+  Bell,
+  Activity
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 const FleetDashboard = () => {
   const { user, logout } = useAuth();
+  const { drivers, analytics, alerts } = useFleetData();
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const mockDrivers = [
-    { id: 1, name: 'John Driver', status: 'alert', fatigueScore: 78, vehicle: 'Truck-A101' },
-    { id: 2, name: 'Sarah Connor', status: 'normal', fatigueScore: 45, vehicle: 'Truck-B202' },
-    { id: 3, name: 'Mike Johnson', status: 'warning', fatigueScore: 62, vehicle: 'Truck-C303' },
-    { id: 4, name: 'Emily Davis', status: 'normal', fatigueScore: 38, vehicle: 'Truck-D404' },
-  ];
+  const filteredDrivers = drivers.filter((driver) =>
+    driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    driver.vehicleId.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'alert': return 'destructive';
-      case 'warning': return 'default';
-      default: return 'secondary';
+  const getStatusBadge = (alertLevel: string) => {
+    switch (alertLevel) {
+      case 'critical': return { variant: 'destructive' as const, label: 'CRITICAL' };
+      case 'warning': return { variant: 'default' as const, label: 'WARNING' };
+      default: return { variant: 'secondary' as const, label: 'NORMAL' };
     }
+  };
+
+  const getFatigueColor = (score: number) => {
+    if (score < 40) return 'text-[hsl(var(--success))]';
+    if (score < 60) return 'text-[hsl(var(--warning))]';
+    return 'text-[hsl(var(--destructive))]';
   };
 
   return (
@@ -54,14 +75,14 @@ const FleetDashboard = () => {
       </header>
 
       {/* Fleet Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card className="p-6 bg-card border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/20">
               <Users className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">4</p>
+              <p className="text-2xl font-bold text-foreground">{analytics.activeDrivers}/{analytics.totalDrivers}</p>
               <p className="text-sm text-muted-foreground">Active Drivers</p>
             </div>
           </div>
@@ -73,7 +94,7 @@ const FleetDashboard = () => {
               <AlertTriangle className="w-5 h-5 text-destructive" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">1</p>
+              <p className="text-2xl font-bold text-foreground">{analytics.criticalAlerts}</p>
               <p className="text-sm text-muted-foreground">Critical Alerts</p>
             </div>
           </div>
@@ -81,41 +102,124 @@ const FleetDashboard = () => {
 
         <Card className="p-6 bg-card border-border">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-500/20">
-              <TrendingUp className="w-5 h-5 text-green-500" />
+            <div className="p-2 rounded-lg bg-[hsl(var(--success))]/20">
+              <TrendingUp className="w-5 h-5 text-[hsl(var(--success))]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">92%</p>
+              <p className="text-2xl font-bold text-foreground">{analytics.fleetSafetyScore}%</p>
               <p className="text-sm text-muted-foreground">Fleet Safety Score</p>
             </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 bg-card border-border">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/20">
+              <Activity className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{analytics.totalTripsToday}</p>
+              <p className="text-sm text-muted-foreground">Trips Today</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <FleetAnalyticsChart />
+        </div>
+
+        {/* Recent Alerts */}
+        <Card className="p-6 bg-card border-border">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Bell className="w-5 h-5 text-primary" />
+            Recent Alerts
+          </h2>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {alerts.slice(0, 5).map((alert) => (
+              <div
+                key={alert.id}
+                className={`p-3 rounded-lg border ${
+                  alert.severity === 'critical' 
+                    ? 'bg-destructive/10 border-destructive/30' 
+                    : 'bg-[hsl(var(--warning))]/10 border-[hsl(var(--warning))]/30'
+                }`}
+              >
+                <p className="text-sm font-semibold text-foreground">{alert.driverName}</p>
+                <p className="text-xs text-muted-foreground mt-1">{alert.message}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {format(alert.timestamp, 'HH:mm:ss')}
+                </p>
+              </div>
+            ))}
           </div>
         </Card>
       </div>
 
       {/* Driver List */}
       <Card className="p-6 bg-card border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4">Driver Status</h2>
-        <div className="space-y-3">
-          {mockDrivers.map((driver) => (
-            <div
-              key={driver.id}
-              className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <p className="font-semibold text-foreground">{driver.name}</p>
-                  <Badge variant={getStatusColor(driver.status)}>
-                    {driver.status.toUpperCase()}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">Vehicle: {driver.vehicle}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-foreground">{driver.fatigueScore}</p>
-                <p className="text-xs text-muted-foreground">Fatigue Score</p>
-              </div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-foreground">Driver Status Monitor</h2>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search drivers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-64"
+              />
             </div>
-          ))}
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          {filteredDrivers.map((driver) => {
+            const statusBadge = getStatusBadge(driver.alertLevel);
+            return (
+              <div
+                key={driver.id}
+                className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border hover:bg-secondary/50 transition-colors"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <p className="font-semibold text-foreground">{driver.name}</p>
+                    <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+                    <Badge variant="outline">{driver.status.replace('-', ' ').toUpperCase()}</Badge>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span>Vehicle: {driver.vehicleId}</span>
+                    <span>•</span>
+                    <span>{driver.email}</span>
+                    <span>•</span>
+                    <span>Trips: {driver.totalTrips}</span>
+                  </div>
+                </div>
+                <div className="flex gap-8 text-center">
+                  <div>
+                    <p className={`text-2xl font-bold ${getFatigueColor(driver.fatigueScore)}`}>
+                      {driver.fatigueScore}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">Fatigue</p>
+                  </div>
+                  <div>
+                    <p className={`text-2xl font-bold ${getFatigueColor(driver.stressLevel)}`}>
+                      {driver.stressLevel}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">Stress</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </Card>
     </div>
