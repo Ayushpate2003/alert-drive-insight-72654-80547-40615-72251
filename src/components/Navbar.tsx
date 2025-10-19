@@ -61,19 +61,20 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className={`bg-primary text-primary-foreground shadow-lg sticky top-0 z-50 transition-all duration-300 ${
+    <nav className={`bg-primary text-white shadow-md sticky top-0 z-50 transition-all duration-300 ${
       scrolled ? 'shadow-xl shadow-primary/30 backdrop-blur-md bg-primary/95' : ''
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-8 py-3">
         <div className="flex justify-between items-center h-16">
           {/* Brand Section */}
           <div 
             className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform duration-200 group"
             onClick={handleBrandClick}
           >
-            <Shield className="w-8 h-8 group-hover:rotate-12 transition-transform duration-300" />
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-accent bg-clip-text text-transparent">
-              SafeYatra
+            <Shield className="w-8 h-8 text-white group-hover:rotate-12 transition-transform duration-300" />
+            <span className="text-xl font-bold tracking-tight">
+              <span className="text-white">Safe</span>
+              <span className="text-accent">Yatra</span>
             </span>
           </div>
 
@@ -86,18 +87,19 @@ export const Navbar = () => {
                 className={({ isActive }) =>
                   `relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 group ${
                     isActive 
-                      ? 'bg-white/20 shadow-md' 
-                      : 'hover:bg-white/10'
+                      ? 'bg-white/10' 
+                      : 'hover:bg-white/5'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
                     <span className="relative z-10">{link.name}</span>
-                    {isActive ? (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent animate-fade-in" />
-                    ) : (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                    {isActive && (
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-accent animate-fade-in" />
+                    )}
+                    {!isActive && (
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                     )}
                   </>
                 )}
@@ -114,13 +116,13 @@ export const Navbar = () => {
                 <Button 
                   onClick={() => navigate('/login')}
                   variant="ghost"
-                  className="text-white hover:bg-white/10 hover:scale-105 transition-all duration-200"
+                  className="text-white hover:bg-transparent hover:underline underline-offset-4 transition-all duration-200"
                 >
                   Login
                 </Button>
                 <Button 
                   onClick={() => navigate('/signup')}
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 hover:scale-105 hover:shadow-lg hover:shadow-accent/30 transition-all duration-200"
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-lg px-6 hover:scale-105 transition-all duration-200 shadow-md"
                 >
                   Sign Up
                 </Button>
