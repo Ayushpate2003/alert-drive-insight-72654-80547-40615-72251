@@ -142,61 +142,6 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t" style={{ borderColor: 'hsl(199, 93%, 59%, 0.2)' }}>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm" style={{ color: 'hsl(228, 100%, 94%, 0.6)' }}>
-              © {currentYear} SafeYatra. All rights reserved.
-            </p>
-            <div className="flex gap-6 text-sm">
-              <Link 
-                to="/privacy" 
-                className="transition-colors duration-200"
-                style={{ color: 'hsl(228, 100%, 94%, 0.6)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'hsl(199, 93%, 59%)';
-                  e.currentTarget.style.textShadow = '0 0 10px hsl(199, 93%, 59%)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'hsl(228, 100%, 94%, 0.6)';
-                  e.currentTarget.style.textShadow = 'none';
-                }}
-              >
-                Privacy Policy
-              </Link>
-              <Link 
-                to="/terms" 
-                className="transition-colors duration-200"
-                style={{ color: 'hsl(228, 100%, 94%, 0.6)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'hsl(199, 93%, 59%)';
-                  e.currentTarget.style.textShadow = '0 0 10px hsl(199, 93%, 59%)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'hsl(228, 100%, 94%, 0.6)';
-                  e.currentTarget.style.textShadow = 'none';
-                }}
-              >
-                Terms of Service
-              </Link>
-              <Link 
-                to="/cookies" 
-                className="transition-colors duration-200"
-                style={{ color: 'hsl(228, 100%, 94%, 0.6)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'hsl(199, 93%, 59%)';
-                  e.currentTarget.style.textShadow = '0 0 10px hsl(199, 93%, 59%)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'hsl(228, 100%, 94%, 0.6)';
-                  e.currentTarget.style.textShadow = 'none';
-                }}
-              >
-                Cookie Policy
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     </footer>
   );
