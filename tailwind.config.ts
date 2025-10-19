@@ -100,12 +100,72 @@ export default {
             transform: "scale(1)"
           }
         },
+        "pulse-glow": {
+          "0%, 100%": {
+            opacity: "1",
+            filter: "brightness(1)"
+          },
+          "50%": {
+            opacity: "0.8",
+            filter: "brightness(1.2)"
+          }
+        },
+        "float": {
+          "0%, 100%": {
+            transform: "translateY(0px)"
+          },
+          "50%": {
+            transform: "translateY(-20px)"
+          }
+        },
+        "slide-up": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(30px)"
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)"
+          }
+        },
+        "data-flow": {
+          "0%": {
+            transform: "translateX(-100%)"
+          },
+          "100%": {
+            transform: "translateX(200%)"
+          }
+        },
+        "rotate-slow": {
+          "0%": {
+            transform: "rotate(0deg)"
+          },
+          "100%": {
+            transform: "rotate(360deg)"
+          }
+        },
+        "ping-slow": {
+          "0%": {
+            transform: "scale(1)",
+            opacity: "1"
+          },
+          "75%, 100%": {
+            transform: "scale(2)",
+            opacity: "0"
+          }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "scale-in": "scale-in 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out forwards",
+        "scale-in": "scale-in 0.3s ease-out forwards",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "float": "float 6s ease-in-out infinite",
+        "slide-up": "slide-up 0.6s ease-out forwards",
+        "data-flow": "data-flow 3s linear infinite",
+        "rotate-slow": "rotate-slow 20s linear infinite",
+        "ping-slow": "ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite",
       },
     },
   },
