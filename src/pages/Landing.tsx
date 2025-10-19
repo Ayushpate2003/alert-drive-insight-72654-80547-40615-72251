@@ -76,10 +76,19 @@ const Landing = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8" onClick={handleGetStarted}>
+              <Button 
+                size="lg" 
+                className="text-lg px-8 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 transition-all duration-200" 
+                onClick={handleGetStarted}
+              >
                 {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
               </Button>
-              <Button asChild variant="outline" size="lg" className="text-lg px-8">
+              <Button 
+                asChild 
+                variant="outline" 
+                size="lg" 
+                className="text-lg px-8 border-2 border-primary bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground hover:scale-105 hover:shadow-xl hover:shadow-primary/20 transition-all duration-200"
+              >
                 <a href="#features">Learn More</a>
               </Button>
             </div>
@@ -223,9 +232,9 @@ interface FeatureCardProps {
 
 const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => {
   return (
-    <Card className="p-6 bg-card border-border hover:border-primary/50 transition-all">
-      <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4">
-        <Icon className="w-6 h-6 text-primary" />
+    <Card className="p-6 bg-card border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 group">
+      <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-primary/30 transition-all duration-300">
+        <Icon className="w-6 h-6 text-primary group-hover:rotate-12 transition-transform duration-300" />
       </div>
       <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
       <p className="text-muted-foreground text-sm">{description}</p>

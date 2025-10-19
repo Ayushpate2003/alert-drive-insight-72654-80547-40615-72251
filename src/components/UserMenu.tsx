@@ -46,22 +46,22 @@ export const UserMenu = ({ user }: UserMenuProps) => {
       {/* User Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-primary/80 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-white/10 hover:scale-105 transition-all duration-200"
       >
-        <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-semibold">
+        <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-semibold shadow-md hover:shadow-lg hover:shadow-accent/30 transition-all">
           {getInitials(user.name)}
         </div>
         <span className="hidden lg:block text-sm font-medium">{user.name}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-card text-card-foreground rounded-md shadow-lg border border-border animate-scale-in z-50">
-          <div className="p-3 border-b border-border">
+        <div className="absolute right-0 mt-2 w-56 bg-card text-card-foreground rounded-md shadow-xl shadow-primary/20 border border-border animate-scale-in z-50 overflow-hidden">
+          <div className="p-3 border-b border-border bg-primary/5">
             <p className="text-sm font-medium">{user.name}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
-            <p className="text-xs text-muted-foreground mt-1 capitalize">{user.role.replace('_', ' ')}</p>
+            <p className="text-xs text-primary mt-1 capitalize font-medium">{user.role.replace('_', ' ')}</p>
           </div>
           
           <div className="py-2">
@@ -70,7 +70,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
                 navigate('/profile');
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-primary/10 hover:translate-x-1 transition-all duration-200"
             >
               <User className="w-4 h-4" />
               My Profile
@@ -81,7 +81,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
                 navigate('/settings');
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-primary/10 hover:translate-x-1 transition-all duration-200"
             >
               <Settings className="w-4 h-4" />
               Settings
@@ -91,7 +91,7 @@ export const UserMenu = ({ user }: UserMenuProps) => {
           <div className="border-t border-border py-2">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 hover:translate-x-1 transition-all duration-200"
             >
               <LogOut className="w-4 h-4" />
               Logout
