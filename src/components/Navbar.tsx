@@ -84,6 +84,7 @@ export const Navbar = () => {
               <NavLink
                 key={link.path}
                 to={link.path}
+                end
                 className={({ isActive }) =>
                   `relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 group ${
                     isActive 
@@ -153,6 +154,7 @@ export const Navbar = () => {
             <NavLink
               key={link.path}
               to={link.path}
+              end
               onClick={() => setIsMobileMenuOpen(false)}
               style={{ 
                 animationDelay: `${index * 50}ms`,
