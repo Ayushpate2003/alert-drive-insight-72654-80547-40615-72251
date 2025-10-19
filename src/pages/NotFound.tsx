@@ -1,5 +1,8 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
@@ -9,14 +12,20 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-gray-600">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 underline hover:text-blue-700">
-          Return to Home
-        </a>
+    <div className="min-h-screen bg-background dark flex items-center justify-center p-4">
+      <div className="absolute top-4 left-4">
+        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
       </div>
+      <Card className="max-w-md w-full p-8 text-center bg-card border-border">
+        <h1 className="text-4xl font-bold text-foreground mb-4">404</h1>
+        <p className="text-xl text-muted-foreground mb-6">Oops! Page not found</p>
+        <Button asChild>
+          <a href="/">Return to Home</a>
+        </Button>
+      </Card>
     </div>
   );
 };

@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 const Unauthorized = () => {
   return (
     <div className="min-h-screen bg-background dark flex items-center justify-center p-4">
+      <div className="absolute top-4 left-4">
+        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
       <Card className="max-w-md w-full p-8 text-center bg-card border-border">
         <div className="w-16 h-16 rounded-full bg-destructive/20 flex items-center justify-center mx-auto mb-4">
           <ShieldAlert className="w-8 h-8 text-destructive" />

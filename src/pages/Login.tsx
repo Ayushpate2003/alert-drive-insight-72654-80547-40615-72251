@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Activity, Loader2 } from 'lucide-react';
+import { Activity, Loader2, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -111,9 +111,10 @@ const Login = () => {
         </Card>
 
         <div className="text-center mt-6">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-primary">
-            ← Back to Home
-          </Link>
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
         </div>
       </div>
     </div>

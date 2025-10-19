@@ -20,11 +20,9 @@ const Dashboard = () => {
       {/* Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
           </Button>
           <div className="flex items-center gap-3">
             <ConnectionStatus isConnected={false} />

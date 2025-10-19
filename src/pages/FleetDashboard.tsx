@@ -48,11 +48,9 @@ const FleetDashboard = () => {
     <div className="min-h-screen bg-background dark p-4 md:p-6">
       <header className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
           </Button>
           <Button variant="outline" size="sm" onClick={() => logout()}>
             <LogOut className="w-4 h-4 mr-2" />
