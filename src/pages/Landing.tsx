@@ -296,13 +296,6 @@ const Landing = () => {
           </Card>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-8 border-t border-border">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 Driver Fatigue Monitor. AI-Powered Safety System.</p>
-        </div>
-      </footer>
     </div>
   );
 };
