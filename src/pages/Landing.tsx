@@ -1,11 +1,60 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Link } from 'react-router-dom';
-import { Activity, Brain, Eye, Gauge, Shield, TrendingUp, AlertTriangle, BarChart3 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Activity, Brain, Eye, Gauge, Shield, TrendingUp, AlertTriangle, BarChart3, LogOut } from 'lucide-react';
 
 const Landing = () => {
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    if (isAuthenticated && user) {
+      // Redirect based on role
+      if (user.role === 'driver') navigate('/dashboard');
+      else if (user.role === 'fleet_manager') navigate('/fleet');
+      else if (user.role === 'admin') navigate('/admin');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background dark">
+      {/* Header with Auth buttons */}
+      <header className="absolute top-0 left-0 right-0 z-20 p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Activity className="w-6 h-6 text-primary" />
+            <span className="font-bold text-foreground">Driver Safety</span>
+          </div>
+          <div className="flex gap-2">
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm text-muted-foreground mr-2 flex items-center">
+                  Welcome, {user?.name}
+                </span>
+                <Button variant="outline" size="sm" onClick={handleGetStarted}>
+                  Go to Dashboard
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => logout()}>
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/login">Login</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
@@ -27,10 +76,8 @@ const Landing = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="text-lg px-8">
-                <Link to="/dashboard">
-                  View Live Dashboard
-                </Link>
+              <Button size="lg" className="text-lg px-8" onClick={handleGetStarted}>
+                {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
               </Button>
               <Button asChild variant="outline" size="lg" className="text-lg px-8">
                 <a href="#features">Learn More</a>
@@ -151,10 +198,8 @@ const Landing = () => {
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               Start monitoring driver fatigue in real-time with our AI-powered system
             </p>
-            <Button asChild size="lg" className="text-lg px-8">
-              <Link to="/dashboard">
-                Launch Dashboard
-              </Link>
+            <Button size="lg" className="text-lg px-8" onClick={handleGetStarted}>
+              {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
             </Button>
           </Card>
         </div>

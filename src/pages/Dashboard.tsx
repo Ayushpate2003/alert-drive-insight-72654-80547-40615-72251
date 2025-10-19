@@ -4,12 +4,14 @@ import { RAGAdvicePanel } from '@/components/RAGAdvicePanel';
 import { CameraPreview } from '@/components/CameraPreview';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { useSimulatedData } from '@/hooks/useSimulatedData';
-import { Activity, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Activity, ArrowLeft, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   const { driverStatus, metricsHistory, recommendations } = useSimulatedData();
+  const { user, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-background dark p-4 md:p-6">
@@ -22,7 +24,13 @@ const Dashboard = () => {
               Back to Home
             </Link>
           </Button>
-          <ConnectionStatus isConnected={false} />
+          <div className="flex items-center gap-3">
+            <ConnectionStatus isConnected={false} />
+            <Button variant="outline" size="sm" onClick={() => logout()}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/20">
@@ -30,10 +38,10 @@ const Dashboard = () => {
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              Driver Fatigue Monitor
+              Driver Dashboard
             </h1>
             <p className="text-sm text-muted-foreground">
-              Real-time AI-powered safety monitoring
+              Welcome back, {user?.name} - Real-time safety monitoring
             </p>
           </div>
         </div>
