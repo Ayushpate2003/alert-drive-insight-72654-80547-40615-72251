@@ -52,40 +52,6 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background dark">
-      {/* Header with Auth buttons */}
-      <header className="absolute top-0 left-0 right-0 z-20 p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Activity className="w-6 h-6 text-primary" />
-            <span className="font-bold text-foreground">Driver Safety</span>
-          </div>
-          <div className="flex gap-2">
-            {isAuthenticated ? (
-              <>
-                <span className="text-sm text-muted-foreground mr-2 flex items-center">
-                  Welcome, {user?.name}
-                </span>
-                <Button variant="outline" size="sm" onClick={handleGetStarted}>
-                  Go to Dashboard
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => logout()}>
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button asChild variant="ghost" size="sm">
-                  <Link to="/login">Login</Link>
-                </Button>
-                <Button asChild size="sm">
-                  <Link to="/signup">Sign Up</Link>
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[90vh] flex items-center">
         {/* Neural Network Background */}
