@@ -61,9 +61,13 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className={`bg-primary text-white shadow-md sticky top-0 z-50 transition-all duration-300 ${
-      scrolled ? 'shadow-xl shadow-primary/30 backdrop-blur-md bg-primary/95' : ''
-    }`}>
+    <nav className={`relative sticky top-0 z-50 transition-all duration-300 ${
+      scrolled ? 'shadow-xl shadow-cyan-500/20 backdrop-blur-md' : 'shadow-md'
+    }`}
+    style={{
+      background: 'linear-gradient(to bottom, hsl(218, 64%, 10%), hsl(0, 0%, 0%))'
+    }}
+    >
       <div className="max-w-7xl mx-auto px-8 py-3">
         <div className="flex justify-between items-center h-16">
           {/* Brand Section */}
@@ -71,10 +75,12 @@ export const Navbar = () => {
             className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform duration-200 group"
             onClick={handleBrandClick}
           >
-            <Shield className="w-8 h-8 text-white group-hover:rotate-12 transition-transform duration-300" />
+            <Shield className="w-8 h-8 group-hover:rotate-12 transition-transform duration-300" 
+              style={{ color: 'hsl(199, 93%, 59%)' }} 
+            />
             <span className="text-xl font-bold tracking-tight">
-              <span className="text-white">Safe</span>
-              <span className="text-accent">Yatra</span>
+              <span style={{ color: 'hsl(0, 0%, 100%)' }}>Safe</span>
+              <span style={{ color: 'hsl(199, 93%, 59%)' }}>Yatra</span>
             </span>
           </div>
 
@@ -88,19 +94,41 @@ export const Navbar = () => {
                 className={({ isActive }) =>
                   `relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 group ${
                     isActive 
-                      ? 'bg-white/10' 
-                      : 'hover:bg-white/5'
+                      ? 'bg-cyan-500/10' 
+                      : 'hover:bg-cyan-500/5'
                   }`
                 }
+                style={({ isActive }) => ({
+                  color: isActive ? 'hsl(199, 93%, 59%)' : 'hsl(228, 100%, 94%)',
+                  textShadow: isActive ? '0 0 10px hsl(199, 93%, 59%)' : 'none'
+                })}
               >
                 {({ isActive }) => (
                   <>
-                    <span className="relative z-10">{link.name}</span>
+                    <span className="relative z-10 group-hover:text-[hsl(199,93%,59%)] transition-colors duration-200"
+                      style={{ 
+                        textShadow: isActive ? '0 0 10px hsl(199, 93%, 59%)' : undefined 
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.textShadow = '0 0 10px hsl(199, 93%, 59%)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.textShadow = 'none';
+                        }
+                      }}
+                    >{link.name}</span>
                     {isActive && (
-                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-accent animate-fade-in" />
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-12 h-0.5 animate-fade-in" 
+                        style={{ backgroundColor: 'hsl(199, 93%, 59%)', boxShadow: '0 0 8px hsl(199, 93%, 59%)' }}
+                      />
                     )}
                     {!isActive && (
-                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-12 h-0.5 scale-x-0 group-hover:scale-x-100 transition-transform duration-300" 
+                        style={{ backgroundColor: 'hsl(199, 93%, 59%)', boxShadow: '0 0 8px hsl(199, 93%, 59%)' }}
+                      />
                     )}
                   </>
                 )}
@@ -117,13 +145,35 @@ export const Navbar = () => {
                 <Button 
                   onClick={() => navigate('/login')}
                   variant="ghost"
-                  className="text-white hover:bg-transparent hover:underline underline-offset-4 transition-all duration-200"
+                  className="hover:bg-transparent hover:underline underline-offset-4 transition-all duration-200"
+                  style={{ 
+                    color: 'hsl(228, 100%, 94%)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'hsl(199, 93%, 59%)';
+                    e.currentTarget.style.textShadow = '0 0 10px hsl(199, 93%, 59%)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'hsl(228, 100%, 94%)';
+                    e.currentTarget.style.textShadow = 'none';
+                  }}
                 >
                   Login
                 </Button>
                 <Button 
                   onClick={() => navigate('/signup')}
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-lg px-6 hover:scale-105 transition-all duration-200 shadow-md"
+                  className="rounded-lg px-6 hover:scale-105 transition-all duration-200 shadow-md"
+                  style={{
+                    backgroundColor: 'hsl(199, 93%, 59%)',
+                    color: 'hsl(218, 64%, 10%)',
+                    boxShadow: '0 0 20px hsl(199, 93%, 59%, 0.5)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 30px hsl(199, 93%, 59%, 0.8)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 20px hsl(199, 93%, 59%, 0.5)';
+                  }}
                 >
                   Sign Up
                 </Button>
@@ -133,8 +183,9 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-md hover:bg-primary/80 transition-colors"
+            className="md:hidden p-2 rounded-md hover:bg-cyan-500/10 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            style={{ color: 'hsl(228, 100%, 94%)' }}
           >
             {isMobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -146,9 +197,14 @@ export const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`md:hidden border-t border-white/20 bg-primary/98 backdrop-blur-md overflow-hidden transition-all duration-300 ${
+      <div className={`md:hidden border-t backdrop-blur-md overflow-hidden transition-all duration-300 ${
         isMobileMenuOpen ? 'max-h-screen' : 'max-h-0'
-      }`}>
+      }`}
+      style={{
+        borderColor: 'hsl(199, 93%, 59%, 0.2)',
+        background: 'linear-gradient(to bottom, hsl(218, 64%, 10%, 0.98), hsl(0, 0%, 0%, 0.98))'
+      }}
+      >
         <div className="px-4 py-4 space-y-2">
           {navLinks.map((link, index) => (
             <NavLink
@@ -156,40 +212,45 @@ export const Navbar = () => {
               to={link.path}
               end
               onClick={() => setIsMobileMenuOpen(false)}
-              style={{ 
-                animationDelay: `${index * 50}ms`,
-                animation: isMobileMenuOpen ? 'fade-in 0.3s ease-out forwards' : 'none'
-              }}
               className={({ isActive }) =>
                 `block px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
                   isActive 
-                    ? 'bg-white/20 border-l-4 border-accent shadow-md' 
-                    : 'hover:bg-white/10 hover:translate-x-1'
+                    ? 'bg-cyan-500/20 border-l-4 shadow-md' 
+                    : 'hover:bg-cyan-500/10 hover:translate-x-1'
                 }`
               }
+              style={({ isActive }) => ({
+                animationDelay: `${index * 50}ms`,
+                animation: isMobileMenuOpen ? 'fade-in 0.3s ease-out forwards' : 'none',
+                color: isActive ? 'hsl(199, 93%, 59%)' : 'hsl(228, 100%, 94%)',
+                textShadow: isActive ? '0 0 10px hsl(199, 93%, 59%)' : 'none',
+                borderColor: isActive ? 'hsl(199, 93%, 59%)' : undefined
+              })}
             >
               {link.name}
             </NavLink>
           ))}
             
           {/* Mobile Login/User Section */}
-          <div className="pt-4 border-t border-white/20 animate-fade-in">
+          <div className="pt-4 border-t animate-fade-in" style={{ borderColor: 'hsl(199, 93%, 59%, 0.2)' }}>
             {isAuthenticated && user ? (
               <div className="space-y-2">
-                <div className="px-4 py-2 text-sm font-medium opacity-80">
+                <div className="px-4 py-2 text-sm font-medium opacity-80" style={{ color: 'hsl(228, 100%, 94%)' }}>
                   {user.name}
                 </div>
                 <NavLink
                   to="/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded-md text-sm hover:bg-white/10 transition-all hover:translate-x-1"
+                  className="block px-4 py-2 rounded-md text-sm hover:bg-cyan-500/10 transition-all hover:translate-x-1"
+                  style={{ color: 'hsl(228, 100%, 94%)' }}
                 >
                   My Profile
                 </NavLink>
                 <NavLink
                   to="/settings"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded-md text-sm hover:bg-white/10 transition-all hover:translate-x-1"
+                  className="block px-4 py-2 rounded-md text-sm hover:bg-cyan-500/10 transition-all hover:translate-x-1"
+                  style={{ color: 'hsl(228, 100%, 94%)' }}
                 >
                   Settings
                 </NavLink>
@@ -198,7 +259,8 @@ export const Navbar = () => {
                     setIsMobileMenuOpen(false);
                     // Logout functionality will be handled by UserMenu
                   }}
-                  className="block w-full text-left px-4 py-2 rounded-md text-sm hover:bg-white/10 transition-all hover:translate-x-1"
+                  className="block w-full text-left px-4 py-2 rounded-md text-sm hover:bg-cyan-500/10 transition-all hover:translate-x-1"
+                  style={{ color: 'hsl(228, 100%, 94%)' }}
                 >
                   Logout
                 </button>
@@ -211,7 +273,8 @@ export const Navbar = () => {
                     navigate('/login');
                   }}
                   variant="ghost"
-                  className="w-full text-white hover:bg-white/10"
+                  className="w-full hover:bg-cyan-500/10"
+                  style={{ color: 'hsl(228, 100%, 94%)' }}
                 >
                   Login
                 </Button>
@@ -220,7 +283,12 @@ export const Navbar = () => {
                     setIsMobileMenuOpen(false);
                     navigate('/signup');
                   }}
-                  className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+                  className="w-full"
+                  style={{
+                    backgroundColor: 'hsl(199, 93%, 59%)',
+                    color: 'hsl(218, 64%, 10%)',
+                    boxShadow: '0 0 20px hsl(199, 93%, 59%, 0.5)'
+                  }}
                 >
                   Sign Up
                 </Button>
