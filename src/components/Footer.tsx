@@ -33,7 +33,11 @@ export const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Shield className="w-8 h-8" style={{ color: 'hsl(199, 93%, 59%)' }} />
+              <img
+                src="/Gemini_Generated_Image_q390vgq390vgq390-removebg-preview (Edited).png"
+                alt="Logo"
+                className="w-8 h-8"
+              />
               <span className="text-xl font-bold">
                 <span style={{ color: 'hsl(0, 0%, 100%)' }}>Safe</span>
                 <span style={{ color: 'hsl(199, 93%, 59%)' }}>Yatra</span>

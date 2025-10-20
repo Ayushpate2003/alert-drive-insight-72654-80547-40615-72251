@@ -71,12 +71,14 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-8 py-3">
         <div className="flex justify-between items-center h-16">
           {/* Brand Section */}
-          <div 
+          <div
             className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform duration-200 group"
             onClick={handleBrandClick}
           >
-            <Shield className="w-8 h-8 group-hover:rotate-12 transition-transform duration-300" 
-              style={{ color: 'hsl(199, 93%, 59%)' }} 
+            <img
+              src="/Gemini_Generated_Image_q390vgq390vgq390-removebg-preview (Edited).png"
+              alt="Logo"
+              className="w-8 h-8 group-hover:rotate-12 transition-transform duration-300"
             />
             <span className="text-xl font-bold tracking-tight">
               <span style={{ color: 'hsl(0, 0%, 100%)' }}>Safe</span>
