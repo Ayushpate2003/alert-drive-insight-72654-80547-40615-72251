@@ -47,9 +47,11 @@ const Signup = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Activity className="w-8 h-8 text-primary" />
-            </div>
+            <img
+              src="/Gemini_Generated_Image_q390vgq390vgq390-removebg-preview (Edited).png"
+              alt="SafeYatra Logo"
+              className="w-8 h-8"
+            />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Create Account</h1>
           <p className="text-muted-foreground">Join our driver safety monitoring system</p>
