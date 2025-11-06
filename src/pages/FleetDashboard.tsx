@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { FleetAnalyticsChart } from '@/components/FleetAnalyticsChart';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFleetData } from '@/hooks/useFleetData';
+import { useSocketIO } from '@/hooks/useSocketIO';
+import { toast } from 'sonner';
 import { 
   ArrowLeft, 
   Users, 
@@ -24,6 +26,17 @@ const FleetDashboard = () => {
   const { user, logout } = useAuth();
   const { drivers, analytics, alerts } = useFleetData();
   const [searchQuery, setSearchQuery] = useState('');
+  const { connected, lastEvent } = useSocketIO({ url: 'http://localhost:3001', orgId: 'org_123' });
+
+  useEffect(() => {
+    if (!lastEvent) return;
+    const { type, severity, metrics, driverId, vehicleId } = lastEvent;
+    const title = `${severity || 'INFO'}: ${type || 'ALERT'}`;
+    const desc = `Driver ${driverId || 'N/A'} • Vehicle ${vehicleId || 'N/A'} • Dist ${metrics?.distance_m ?? '-'}m • dV ${metrics?.relative_speed_kmh ?? '-'}km/h • Fatigue ${metrics?.fatigue_score ?? '-'}`;
+    toast(title, {
+      description: desc,
+    });
+  }, [lastEvent]);
 
   const filteredDrivers = drivers.filter((driver) =>
     driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -130,10 +143,11 @@ const FleetDashboard = () => {
 
         {/* Recent Alerts */}
         <Card className="p-6 bg-card border-border">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
             <Bell className="w-5 h-5 text-primary" />
             Recent Alerts
           </h2>
+          <p className="text-xs text-muted-foreground mb-2">Live feed: {connected ? 'Connected' : 'Disconnected'}</p>
           <div className="space-y-3 max-h-[400px] overflow-y-auto">
             {alerts.slice(0, 5).map((alert) => (
               <div

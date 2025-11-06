@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { DriverStatusCard } from '@/components/DriverStatusCard';
 import { LiveMetricsChart } from '@/components/LiveMetricsChart';
 import { RAGAdvicePanel } from '@/components/RAGAdvicePanel';
@@ -6,6 +7,7 @@ import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { TripHistoryPanel } from '@/components/TripHistoryPanel';
 import { ProfileSection } from '@/components/ProfileSection';
 import { useSimulatedData } from '@/hooks/useSimulatedData';
+import { useSocketIO } from '@/hooks/useSocketIO';
 import { useAuth } from '@/contexts/AuthContext';
 import { Activity, ArrowLeft, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -14,6 +16,18 @@ import { Button } from '@/components/ui/button';
 const Dashboard = () => {
   const { driverStatus, metricsHistory, recommendations } = useSimulatedData();
   const { user, logout } = useAuth();
+  const { connected, lastEvent } = useSocketIO({ url: 'http://localhost:3001', orgId: 'org_123' });
+  const [blinkRate, setBlinkRate] = useState<number | undefined>(undefined);
+  const [yawns5m, setYawns5m] = useState<number | undefined>(undefined);
+  const [headPos, setHeadPos] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!lastEvent?.metrics) return;
+    const m = lastEvent.metrics;
+    if (typeof m.blink_rate_per_min === 'number') setBlinkRate(m.blink_rate_per_min);
+    if (typeof m.yawns_last_5m === 'number') setYawns5m(m.yawns_last_5m);
+    if (typeof m.head_pose_label === 'string') setHeadPos(m.head_pose_label);
+  }, [lastEvent]);
 
   return (
     <div className="min-h-screen bg-background dark p-4 md:p-6">
@@ -25,7 +39,7 @@ const Dashboard = () => {
             Back
           </Button>
           <div className="flex items-center gap-3">
-            <ConnectionStatus isConnected={false} />
+            <ConnectionStatus isConnected={connected} />
             <Button variant="outline" size="sm" onClick={() => logout()}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -54,7 +68,7 @@ const Dashboard = () => {
           <DriverStatusCard status={driverStatus} />
           <LiveMetricsChart data={metricsHistory} />
           <TripHistoryPanel />
-          <CameraPreview isActive={true} />
+          <CameraPreview isActive={true} blinkRatePerMin={blinkRate} yawnsLast5m={yawns5m} headPosLabel={headPos} />
         </div>
 
         {/* Right Column - Sidebar */}

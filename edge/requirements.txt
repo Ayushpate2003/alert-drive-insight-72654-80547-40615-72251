@@ -1,0 +1,11 @@
+python-socketio[client]==5.11.2
+numpy==1.26.4
+opencv-python==4.10.0.84
+# Enable real inference modules (install time may be longer)
+mediapipe==0.10.14
+ultralytics==8.3.33
+# Optional: trackers and utils if you later add DeepSORT/ByteTrack
+# filterpy==1.4.5
+# lapx==0.5.7
+# dlib requires build tools on Windows; prefer MediaPipe on Windows
+# dlib==19.24.4
