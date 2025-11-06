@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@/types/auth';
+import { User, UserRole } from '@/types/auth';
 import { authService } from '@/services/authService';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, role: User['role']) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  signup: (name: string, email: string, password: string, role: User['role']) => Promise<User>;
+  signInWithGoogle: (role: UserRole) => Promise<User>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   hasRole: (role: User['role'] | User['role'][]) => boolean;
@@ -48,23 +49,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     try {
       const response = await authService.login({ email, password });
       setUser(response.user);
       setToken(response.token);
       localStorage.setItem(TOKEN_KEY, response.token);
+      return response.user;
     } catch (error) {
       throw error;
     }
   };
 
-  const signup = async (name: string, email: string, password: string, role: User['role']) => {
+  const signup = async (name: string, email: string, password: string, role: User['role']): Promise<User> => {
     try {
       const response = await authService.signup({ name, email, password, role });
       setUser(response.user);
       setToken(response.token);
       localStorage.setItem(TOKEN_KEY, response.token);
+      return response.user;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const signInWithGoogle = async (role: UserRole): Promise<User> => {
+    try {
+      const response = await authService.signInWithGoogle(role);
+      setUser(response.user);
+      setToken(response.token);
+      localStorage.setItem(TOKEN_KEY, response.token);
+      return response.user;
     } catch (error) {
       throw error;
     }
@@ -96,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         signup,
+        signInWithGoogle,
         logout,
         isAuthenticated: !!user,
         hasRole,
