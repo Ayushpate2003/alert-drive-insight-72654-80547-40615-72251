@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Activity, Loader2, ArrowLeft } from 'lucide-react';
 import { UserRole } from '@/types/auth';
+import { getDashboardPath } from '@/lib/utils';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -25,12 +26,12 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      await signup(name, email, password, role);
+      const user = await signup(name, email, password, role);
       toast({
         title: 'Account created!',
         description: 'Welcome to Driver Safety Monitor',
       });
-      navigate('/dashboard');
+      navigate(getDashboardPath(user.role));
     } catch (error) {
       toast({
         title: 'Signup failed',
