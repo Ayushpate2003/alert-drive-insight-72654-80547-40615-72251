@@ -1,19 +1,48 @@
+import { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Camera, VideoOff } from 'lucide-react';
 
 interface CameraPreviewProps {
   isActive?: boolean;
+  blinkRatePerMin?: number;
+  yawnsLast5m?: number;
+  headPosLabel?: string;
 }
 
-export const CameraPreview = ({ isActive = true }: CameraPreviewProps) => {
+export const CameraPreview = ({ isActive = true, blinkRatePerMin, yawnsLast5m, headPosLabel }: CameraPreviewProps) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [streamOn, setStreamOn] = useState(false);
+
+  useEffect(() => {
+    let currentStream: MediaStream | null = null;
+    const start = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        currentStream = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setStreamOn(true);
+      } catch (e) {
+        setStreamOn(false);
+      }
+    };
+    start();
+    return () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+      }
+    };
+  }, []);
   return (
     <Card className="p-6 bg-card border-border">
       <h3 className="text-xl font-bold text-foreground mb-4">Driver Camera</h3>
       <div className="relative aspect-video bg-secondary rounded-lg overflow-hidden flex items-center justify-center">
         {isActive ? (
           <>
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" autoPlay playsInline muted />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-card/50" />
-            <Camera className="w-16 h-16 text-muted-foreground opacity-50" />
+            {!streamOn && <Camera className="w-16 h-16 text-muted-foreground opacity-50" />}
             <div className="absolute top-4 right-4 flex items-center gap-2 bg-card/80 px-3 py-1.5 rounded-full">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs font-medium text-foreground">LIVE</span>
@@ -36,15 +65,15 @@ export const CameraPreview = ({ isActive = true }: CameraPreviewProps) => {
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div>
                   <span className="text-muted-foreground">Blink Rate:</span>
-                  <span className="ml-2 text-foreground font-medium">18/min</span>
+                  <span className="ml-2 text-foreground font-medium">{(blinkRatePerMin ?? 18).toFixed(0)}/min</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Yawns:</span>
-                  <span className="ml-2 text-foreground font-medium">2</span>
+                  <span className="ml-2 text-foreground font-medium">{yawnsLast5m ?? 2}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Head Pos:</span>
-                  <span className="ml-2 text-foreground font-medium">Normal</span>
+                  <span className="ml-2 text-foreground font-medium">{headPosLabel ?? 'Normal'}</span>
                 </div>
               </div>
             </div>

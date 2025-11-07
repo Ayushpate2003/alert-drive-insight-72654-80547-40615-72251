@@ -1,125 +1,222 @@
-import { User, AuthResponse, LoginCredentials, SignupCredentials } from '@/types/auth';
+import { 
+  User, 
+  AuthResponse, 
+  LoginCredentials, 
+  SignupCredentials, 
+  UserRole 
+} from '@/types/auth';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut as firebaseSignOut,
+  User as FirebaseUser,
+  onAuthStateChanged,
+  AuthError,
+  AuthErrorCodes
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db, googleProvider } from '@/lib/firebase';
 
-// Mock users for demonstration - REPLACE THIS WITH REAL BACKEND API CALLS
-const MOCK_USERS = [
-  {
-    id: '1',
-    email: 'driver@test.com',
-    password: 'password123',
-    name: 'John Driver',
-    role: 'driver' as const,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    email: 'manager@test.com',
-    password: 'password123',
-    name: 'Sarah Manager',
-    role: 'fleet_manager' as const,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    email: 'admin@test.com',
-    password: 'password123',
-    name: 'Admin User',
-    role: 'admin' as const,
-    createdAt: new Date().toISOString(),
-  },
-];
+// Helper to map Firebase user to our User type
+const mapFirebaseUser = async (firebaseUser: FirebaseUser): Promise<User> => {
+  try {
+    // Get user data from Firestore
+    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+    const userData = userDoc.data();
 
-/**
- * Auth Service - Connect to your Node.js backend
- * 
- * Backend API Endpoints you need to implement:
- * - POST /api/auth/login - Returns { user, token }
- * - POST /api/auth/signup - Returns { user, token }
- * - GET /api/auth/me - Returns current user (requires JWT)
- * - POST /api/auth/logout - Invalidates token
- */
+    if (!userData) {
+      throw new Error('User data not found');
+    }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    return {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      name: userData.name || firebaseUser.displayName || 'User',
+      role: userData.role || 'driver',
+      avatar: firebaseUser.photoURL || undefined,
+      createdAt: userData.createdAt?.toDate()?.toISOString() || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('Error mapping Firebase user:', error);
+    throw new Error('Failed to load user data');
+  }
+};
 
 export const authService = {
   /**
-   * Login user
-   * REPLACE WITH: await fetch(`${API_BASE_URL}/auth/login`, { method: 'POST', ... })
+   * Login user with email and password
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const user = MOCK_USERS.find(
-      u => u.email === credentials.email && u.password === credentials.password
-    );
-
-    if (!user) {
-      throw new Error('Invalid email or password');
+    try {
+      const { email, password } = credentials;
+      
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+      
+      // Sign in with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Get user data from Firestore
+      const user = await mapFirebaseUser(userCredential.user);
+      
+      // Get the ID token
+      const token = await userCredential.user.getIdToken();
+      
+      return { user, token };
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        throw new Error('Invalid email or password');
+      } else if (error.code === 'auth/too-many-requests') {
+        throw new Error('Too many failed attempts. Please try again later.');
+      } else {
+        throw new Error(error.message || 'Failed to sign in');
+      }
     }
-
-    const { password, ...userWithoutPassword } = user;
-    const token = `mock_jwt_token_${user.id}_${Date.now()}`;
-
-    return {
-      user: userWithoutPassword,
-      token,
-    };
   },
 
   /**
-   * Signup new user
-   * REPLACE WITH: await fetch(`${API_BASE_URL}/auth/signup`, { method: 'POST', ... })
+   * Signup new user with email and password
    */
   async signup(credentials: SignupCredentials): Promise<AuthResponse> {
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Check if user exists
-    if (MOCK_USERS.some(u => u.email === credentials.email)) {
-      throw new Error('User with this email already exists');
-    }
-
-    const newUser: User = {
-      id: `${Date.now()}`,
-      email: credentials.email,
-      name: credentials.name,
-      role: credentials.role,
+    try {
+      const { email, password, name, role = 'driver' } = credentials;
+      
+      if (!email || !password || !name) {
+        throw new Error('Name, email, and password are required');
+      }
+      
+      if (password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+      
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const { user } = userCredential;
+      
+      // Create user document in Firestore
+      const userData = {
+        name,
+        email,
+        role,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+      
+      await setDoc(doc(db, 'users', user.uid), userData);
+      
+      // Get the created user with role
+      const createdUser = {
+        id: user.uid,
+        email: user.email || '',
+        name,
+        role,
+        avatar: user.photoURL || undefined,
       createdAt: new Date().toISOString(),
     };
-
-    const token = `mock_jwt_token_${newUser.id}_${Date.now()}`;
-
-    // In real app, this would be saved to backend
-    MOCK_USERS.push({ ...newUser, password: credentials.password } as any);
-
-    return {
-      user: newUser,
-      token,
-    };
+    
+    // Get the ID token
+    const token = await user.getIdToken();
+    
+    return { user: createdUser, token };
+    } catch (error) {
+      console.error('Signup error:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        throw new Error('Email is already in use');
+      } else if (error.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address');
+      } else if (error.code === 'auth/weak-password') {
+        throw new Error('Password is too weak');
+      } else {
+        throw new Error(error.message || 'Failed to create account');
+      }
+    }
   },
 
   /**
-   * Get current user from token
-   * REPLACE WITH: await fetch(`${API_BASE_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+   * Get current user from Firebase Auth state
    */
   async getCurrentUser(token: string): Promise<User | null> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Extract user ID from mock token
-    const userId = token.split('_')[3];
-    const user = MOCK_USERS.find(u => u.id === userId);
-
-    if (!user) return null;
-
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    // If we have a token, get the current user
+    if (auth.currentUser) {
+      return mapFirebaseUser(auth.currentUser);
+    }
+    
+    // If no current user but we have a token, try to get the user
+    if (token) {
+      // This will trigger the onAuthStateChanged listener if the user is still logged in
+      return new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(
+          auth,
+          async (user) => {
+            unsubscribe();
+            if (user) {
+              try {
+                const userData = await mapFirebaseUser(user);
+                resolve(userData);
+              } catch (error) {
+                console.error('Error mapping user:', error);
+                resolve(null);
+              }
+            } else {
+              resolve(null);
+            }
+          },
+          (error) => {
+            unsubscribe();
+            console.error('Auth state error:', error);
+            resolve(null);
+          }
+        );
+      });
+    }
+    
+    return null;
   },
 
   /**
+   * Sign in with Google
+   */
+  async signInWithGoogle(role: UserRole = 'driver'): Promise<AuthResponse> {
+    try {
+      // Sign in with Google
+      const result = await signInWithPopup(auth, googleProvider);
+      const { user } = result;
+      
+      // Check if user already exists
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (!userDoc.exists()) {
+        // Create user document if it doesn't exist
+        const userData = {
+          name: user.displayName || 'User',
+          email: user.email || '',
+          role,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+        
+        await setDoc(doc(db, 'users', user.uid), userData);
+      }
+      
+      // Get the user with role
+      const currentUser = await mapFirebaseUser(user);
+      const token = await user.getIdToken();
+      
+      return { user: currentUser, token };
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  },
+  
+  /**
    * Logout user
-   * REPLACE WITH: await fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST', ... })
    */
   async logout(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    // Backend would invalidate the token
+    await firebaseSignOut(auth);
   },
 };
