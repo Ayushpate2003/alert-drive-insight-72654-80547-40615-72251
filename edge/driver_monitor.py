@@ -46,7 +46,7 @@ class DriverMonitor:
         self._yawns: Deque[float] = deque()
         self._last_blink_ts: float = 0.0
         self._mp = mp
-        if self._mp:
+        if self._mp and hasattr(self._mp, 'solutions'):
             self._face_mesh = self._mp.solutions.face_mesh.FaceMesh(
                 max_num_faces=1,
                 refine_landmarks=True,
