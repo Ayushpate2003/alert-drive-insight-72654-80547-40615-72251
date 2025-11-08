@@ -23,13 +23,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage and handle Google redirect
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = localStorage.getItem(TOKEN_KEY);
-      
-      if (storedToken) {
-        try {
+      try {
+        // First, check if we're returning from a Google redirect
+        const redirectResult = await authService.getRedirectResult();
+        if (redirectResult) {
+          setUser(redirectResult.user);
+          setToken(redirectResult.token);
+          localStorage.setItem(TOKEN_KEY, redirectResult.token);
+          setIsLoading(false);
+          return;
+        }
+
+        // Otherwise, check for stored token
+        const storedToken = localStorage.getItem(TOKEN_KEY);
+        if (storedToken) {
           const currentUser = await authService.getCurrentUser(storedToken);
           if (currentUser) {
             setUser(currentUser);
@@ -37,13 +47,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             localStorage.removeItem(TOKEN_KEY);
           }
-        } catch (error) {
-          console.error('Failed to restore session:', error);
-          localStorage.removeItem(TOKEN_KEY);
         }
+      } catch (error) {
+        console.error('Failed to restore session:', error);
+        localStorage.removeItem(TOKEN_KEY);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     initAuth();
@@ -76,10 +86,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async (role: UserRole): Promise<User> => {
     try {
       const response = await authService.signInWithGoogle(role);
-      setUser(response.user);
-      setToken(response.token);
-      localStorage.setItem(TOKEN_KEY, response.token);
-      return response.user;
+      if (response) {
+        setUser(response.user);
+        setToken(response.token);
+        localStorage.setItem(TOKEN_KEY, response.token);
+        return response.user;
+      } else {
+        // Handle redirect case - user will be redirected
+        throw new Error('Redirecting to Google...');
+      }
     } catch (error) {
       throw error;
     }

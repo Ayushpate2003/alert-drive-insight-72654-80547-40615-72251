@@ -5,11 +5,12 @@ import {
   SignupCredentials, 
   UserRole 
 } from '@/types/auth';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   User as FirebaseUser,
   onAuthStateChanged,
@@ -178,37 +179,90 @@ export const authService = {
   },
 
   /**
+   * Get redirect result from Google sign in
+   */
+  async getRedirectResult(): Promise<AuthResponse | null> {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result) {
+        const { user } = result;
+
+        // Check if user already exists
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+        if (!userDoc.exists()) {
+          // Create user document if it doesn't exist
+          const userData = {
+            name: user.displayName || 'User',
+            email: user.email || '',
+            role: 'driver', // Default role for Google sign in
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          };
+
+          await setDoc(doc(db, 'users', user.uid), userData);
+        }
+
+        // Get the user with role
+        const currentUser = await mapFirebaseUser(user);
+        const token = await user.getIdToken();
+
+        return { user: currentUser, token };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting redirect result:', error);
+      return null;
+    }
+  },
+
+  /**
    * Sign in with Google
    */
   async signInWithGoogle(role: UserRole = 'driver'): Promise<AuthResponse> {
     try {
-      // Sign in with Google
-      const result = await signInWithPopup(auth, googleProvider);
-      const { user } = result;
-      
-      // Check if user already exists
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      
-      if (!userDoc.exists()) {
-        // Create user document if it doesn't exist
-        const userData = {
-          name: user.displayName || 'User',
-          email: user.email || '',
-          role,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        };
-        
-        await setDoc(doc(db, 'users', user.uid), userData);
+      // Try redirect method first to avoid popup blockers
+      googleProvider.setCustomParameters({
+        prompt: 'select_account'
+      });
+
+      // Check if we're returning from a redirect
+      const result = await getRedirectResult(auth);
+      if (result) {
+        const { user } = result;
+
+        // Check if user already exists
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+        if (!userDoc.exists()) {
+          // Create user document if it doesn't exist
+          const userData = {
+            name: user.displayName || 'User',
+            email: user.email || '',
+            role,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          };
+
+          await setDoc(doc(db, 'users', user.uid), userData);
+        }
+
+        // Get the user with role
+        const currentUser = await mapFirebaseUser(user);
+        const token = await user.getIdToken();
+
+        return { user: currentUser, token };
+      } else {
+        // No redirect result, initiate redirect
+        await signInWithRedirect(auth, googleProvider);
+        // This will redirect the page, so we won't reach here
+        throw new Error('Redirecting to Google...');
       }
-      
-      // Get the user with role
-      const currentUser = await mapFirebaseUser(user);
-      const token = await user.getIdToken();
-      
-      return { user: currentUser, token };
     } catch (error) {
       console.error('Error signing in with Google:', error);
+      if (error.code === 'auth/popup-blocked') {
+        throw new Error('Popup was blocked. Please allow popups for this site and try again.');
+      }
       throw error;
     }
   },

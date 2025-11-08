@@ -9,11 +9,11 @@ export function cn(...inputs: ClassValue[]) {
 export function getDashboardPath(role: UserRole): string {
   switch (role) {
     case 'admin':
-      return '/admin-dashboard';
-    case 'fleet_manager':
-      return '/fleet-dashboard';
+      return '/dashboard/admin';
+    case 'manager':
+      return '/dashboard/manager';
     case 'driver':
     default:
-      return '/dashboard';
+      return '/dashboard/driver';
   }
 }

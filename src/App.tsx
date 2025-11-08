@@ -35,7 +35,7 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route
-                  path="/dashboard"
+                  path="/dashboard/driver"
                   element={
                     <ProtectedRoute allowedRoles={['driver']}>
                       <Dashboard />
@@ -43,15 +43,15 @@ const App = () => (
                   }
                 />
                 <Route
-                  path="/fleet-dashboard"
+                  path="/dashboard/manager"
                   element={
-                    <ProtectedRoute allowedRoles={['fleet_manager']}>
+                    <ProtectedRoute allowedRoles={['manager']}>
                       <FleetDashboard />
                     </ProtectedRoute>
                   }
                 />
                 <Route
-                  path="/admin-dashboard"
+                  path="/dashboard/admin"
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <AdminDashboard />

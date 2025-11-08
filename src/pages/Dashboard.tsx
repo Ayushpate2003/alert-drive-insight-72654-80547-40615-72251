@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { DriverStatusCard } from '@/components/DriverStatusCard';
 import { LiveMetricsChart } from '@/components/LiveMetricsChart';
 import { RAGAdvicePanel } from '@/components/RAGAdvicePanel';
-import { CameraPreview } from '@/components/CameraPreview';
+import { EnhancedCameraPreview } from '@/components/EnhancedCameraPreview';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
 import { TripHistoryPanel } from '@/components/TripHistoryPanel';
 import { ProfileSection } from '@/components/ProfileSection';
@@ -68,7 +68,7 @@ const Dashboard = () => {
           <DriverStatusCard status={driverStatus} />
           <LiveMetricsChart data={metricsHistory} />
           <TripHistoryPanel />
-          <CameraPreview isActive={true} blinkRatePerMin={blinkRate} yawnsLast5m={yawns5m} headPosLabel={headPos} />
+          <EnhancedCameraPreview isActive={true} blinkRatePerMin={blinkRate} yawnsLast5m={yawns5m} headPosLabel={headPos} />
         </div>
 
         {/* Right Column - Sidebar */}

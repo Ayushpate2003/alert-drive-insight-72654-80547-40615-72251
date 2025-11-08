@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,10 +15,17 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const { login, signInWithGoogle } = useAuth();
+  const { login, signInWithGoogle, isAuthenticated, user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      navigate(getDashboardPath(user.role), { replace: true });
+    }
+  }, [isAuthenticated, user, authLoading, navigate]);
   
   // Get the role from URL query params if present
   const searchParams = new URLSearchParams(location.search);
@@ -60,13 +67,12 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const user = await signInWithGoogle(role);
+      await signInWithGoogle(role);
+      // If we reach here, it means redirect is happening
       toast({
-        title: 'Welcome!',
-        description: 'Google sign in successful',
+        title: 'Redirecting...',
+        description: 'Redirecting to Google for authentication',
       });
-      // Redirect based on user role
-      navigate(getDashboardPath(user.role));
     } catch (error) {
       console.error('Google sign in error:', error);
       toast({
@@ -74,7 +80,6 @@ const Login = () => {
         description: error instanceof Error ? error.message : 'Failed to sign in with Google',
         variant: 'destructive',
       });
-    } finally {
       setIsGoogleLoading(false);
     }
   };
@@ -91,7 +96,7 @@ const Login = () => {
             />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
-            {role === 'admin' ? 'Admin Login' : role === 'fleet_manager' ? 'Manager Login' : 'Driver Login'}
+            {role === 'admin' ? 'Admin Login' : role === 'manager' ? 'Manager Login' : 'Driver Login'}
           </h1>
           <p className="text-muted-foreground">Enter your credentials to access your account</p>
         </div>
@@ -175,26 +180,19 @@ const Login = () => {
               </div>
               {role !== 'driver' && (
                 <div>
-                  Are you a {role === 'admin' ? 'driver' : 'admin'}?{' '}
-                  <Link 
-                    to={`/login?role=${role === 'admin' ? 'driver' : 'admin'}`}
+                  Are you a {role === 'admin' ? 'driver' : role === 'manager' ? 'admin' : 'driver'}?{' '}
+                  <Link
+                    to={`/login?role=${role === 'admin' ? 'driver' : role === 'manager' ? 'admin' : 'driver'}`}
                     className="underline hover:text-primary"
                   >
-                    Sign in as {role === 'admin' ? 'Driver' : 'Admin'}
+                    Sign in as {role === 'admin' ? 'Driver' : role === 'manager' ? 'Admin' : 'Manager'}
                   </Link>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-6 p-4 rounded-lg bg-secondary/50 border border-border">
-            <p className="text-xs font-semibold text-foreground mb-2">Demo Accounts:</p>
-            <div className="space-y-1 text-xs text-muted-foreground">
-              <p>Driver: driver@test.com / password123</p>
-              <p>Manager: manager@test.com / password123</p>
-              <p>Admin: admin@test.com / password123</p>
-            </div>
-          </div>
+
         </Card>
 
         <div className="text-center mt-6">
