@@ -29,6 +29,7 @@ import {
 import { NeuralBackground } from "@/components/NeuralBackground";
 import { WireframeCar } from "@/components/WireframeCar";
 import { useEffect, useRef, useState } from "react";
+import { DashCamSubPages } from "@/components/DashCamSubPages";
 
 const Landing = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -65,9 +66,9 @@ const Landing = () => {
   const handleGetStarted = () => {
     if (isAuthenticated && user) {
       // Redirect based on role
-      if (user.role === "driver") navigate("/dashboard");
-      else if (user.role === "fleet_manager") navigate("/fleet");
-      else if (user.role === "admin") navigate("/admin");
+      if (user.role === "driver") navigate("/dashboard/driver");
+      else if (user.role === "manager") navigate("/dashboard/manager");
+      else if (user.role === "admin") navigate("/dashboard/admin");
     } else {
       navigate("/login");
     }
@@ -247,40 +248,14 @@ const Landing = () => {
             }`}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 drop-shadow-[0_0_20px_rgba(0,191,255,0.5)]">
-              DashCam Intelligence
+              ⚙️ How the DashCam Module Enhances the System
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Showcase the DashCam-based speed & distance detection system.
+              Explore the technical details and real-time capabilities of our AI-powered DashCam system.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            <FeatureCard
-              icon={Camera}
-              title=" Live DashCam Demo"
-              description="Real-time object tracking visualization (YOLOv8 overlay)"
-            />
-            <FeatureCard
-              icon={Gauge}
-              title=" Safe Distance Metrics"
-              description="Graphs showing how AI calculates following distance"
-            />
-            <FeatureCard
-              icon={AlertTriangle}
-              title=" Alert Examples"
-              description='"Too close", "Maintain safe gap", "Vehicle ahead braking"'
-            />
-            <FeatureCard
-              icon={Brain}
-              title=" Integrated with Fatigue Engine"
-              description="Explains fusion between DashCam + Driver state"
-            />
-            <FeatureCard
-              icon={Database}
-              title=" Data Recording"
-              description="How DashCam data is logged and visualized in the dashboard"
-            />
-          </div>
+          <DashCamSubPages />
         </div>
       </section>
 

@@ -1,289 +1,276 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/contexts/AuthContext';
-import { useAdminData } from '@/hooks/useAdminData';
-import { 
-  ArrowLeft, 
-  Shield, 
-  Users, 
-  Database, 
-  Settings, 
-  LogOut,
-  Search,
-  Plus,
-  Edit,
-  Trash2,
+import { useNavigate } from 'react-router-dom';
+import {
+  Shield,
+  Users,
+  Database,
   Activity,
   Cpu,
-  HardDrive
+  HardDrive,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Settings
 } from 'lucide-react';
-import { format } from 'date-fns';
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth();
-  const { users, auditLogs, metrics } = useAdminData();
-  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
-  const filteredUsers = users.filter((u) =>
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'destructive';
-      case 'fleet_manager': return 'default';
-      default: return 'secondary';
-    }
+  // Mock data for demonstration
+  const metrics = {
+    totalUsers: 1247,
+    activeUsers: 892,
+    systemHealth: 98.5,
+    totalTrips: 15432,
+    alertsToday: 23,
+    memoryUsage: 67.3,
+    cpuUsage: 45.2,
+    storageUsage: 78.9
   };
 
+  const recentActivity = [
+    {
+      id: 1,
+      type: 'user_login',
+      message: 'Driver John Doe logged in',
+      timestamp: new Date(Date.now() - 1000 * 60 * 5),
+      severity: 'info'
+    },
+    {
+      id: 2,
+      type: 'alert_triggered',
+      message: 'Fatigue alert for Driver Sarah Wilson',
+      timestamp: new Date(Date.now() - 1000 * 60 * 15),
+      severity: 'warning'
+    },
+    {
+      id: 3,
+      type: 'system_update',
+      message: 'AI model retrained successfully',
+      timestamp: new Date(Date.now() - 1000 * 60 * 30),
+      severity: 'success'
+    }
+  ];
+
+
+
   return (
-    <div className="min-h-screen bg-background dark p-4 md:p-6">
-      <header className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => logout()}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/20">
-            <Shield className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              Admin Dashboard
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Welcome back, {user?.name}
-            </p>
-          </div>
-        </div>
-      </header>
+    <div className="p-6">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">System Overview</h2>
+        <p className="text-gray-400">Monitor your SafeYatra platform performance and user activity</p>
+      </div>
 
       {/* System Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="p-6 bg-card border-border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Users className="w-5 h-5 text-primary" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card className="p-6 bg-[#1a1a1a] border-gray-700 hover:bg-[#202020] transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-[#00B4D8]/20">
+              <Users className="w-6 h-6 text-[#00B4D8]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{metrics.totalUsers}</p>
-              <p className="text-sm text-muted-foreground">Total Users</p>
+              <p className="text-2xl font-bold text-white">{metrics.totalUsers.toLocaleString()}</p>
+              <p className="text-sm text-gray-400">Total Users</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-card border-border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Activity className="w-5 h-5 text-primary" />
+        <Card className="p-6 bg-[#1a1a1a] border-gray-700 hover:bg-[#202020] transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-[#00B4D8]/20">
+              <Activity className="w-6 h-6 text-[#00B4D8]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{metrics.activeSessions}</p>
-              <p className="text-sm text-muted-foreground">Active Sessions</p>
+              <p className="text-2xl font-bold text-white">{metrics.activeUsers.toLocaleString()}</p>
+              <p className="text-sm text-gray-400">Active Users</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-card border-border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Database className="w-5 h-5 text-primary" />
+        <Card className="p-6 bg-[#1a1a1a] border-gray-700 hover:bg-[#202020] transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-[#00B4D8]/20">
+              <TrendingUp className="w-6 h-6 text-[#00B4D8]" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{metrics.databaseSize}</p>
-              <p className="text-sm text-muted-foreground">Database Size</p>
+              <p className="text-2xl font-bold text-white">{metrics.totalTrips.toLocaleString()}</p>
+              <p className="text-sm text-gray-400">Total Trips</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-card border-border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[hsl(var(--success))]/20">
-              <Shield className="w-5 h-5 text-[hsl(var(--success))]" />
+        <Card className="p-6 bg-[#1a1a1a] border-gray-700 hover:bg-[#202020] transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-green-500/20">
+              <CheckCircle className="w-6 h-6 text-green-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{metrics.systemHealth}%</p>
-              <p className="text-sm text-muted-foreground">System Health</p>
+              <p className="text-2xl font-bold text-white">{metrics.systemHealth}%</p>
+              <p className="text-sm text-gray-400">System Health</p>
             </div>
           </div>
         </Card>
       </div>
 
       {/* System Monitoring */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card className="p-6 bg-card border-border">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="p-6 bg-[#1a1a1a] border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-primary" />
+            <h3 className="text-lg font-semibold text-white flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#00B4D8]/20">
+                <Cpu className="w-5 h-5 text-[#00B4D8]" />
+              </div>
               CPU Usage
             </h3>
-            <span className="text-xl font-bold text-foreground">{metrics.cpuUsage}%</span>
+            <span className="text-2xl font-bold text-white">{metrics.cpuUsage}%</span>
           </div>
-          <div className="w-full bg-secondary rounded-full h-2">
+          <div className="w-full bg-gray-700 rounded-full h-3">
             <div
-              className="bg-primary rounded-full h-2 transition-all"
+              className="bg-[#00B4D8] rounded-full h-3 transition-all duration-300"
               style={{ width: `${metrics.cpuUsage}%` }}
             />
           </div>
+          <p className="text-sm text-gray-400 mt-2">System processing load</p>
         </Card>
 
-        <Card className="p-6 bg-card border-border">
+        <Card className="p-6 bg-[#1a1a1a] border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <HardDrive className="w-4 h-4 text-primary" />
+            <h3 className="text-lg font-semibold text-white flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#00B4D8]/20">
+                <HardDrive className="w-5 h-5 text-[#00B4D8]" />
+              </div>
               Memory Usage
             </h3>
-            <span className="text-xl font-bold text-foreground">{metrics.memoryUsage}%</span>
+            <span className="text-2xl font-bold text-white">{metrics.memoryUsage}%</span>
           </div>
-          <div className="w-full bg-secondary rounded-full h-2">
+          <div className="w-full bg-gray-700 rounded-full h-3">
             <div
-              className="bg-primary rounded-full h-2 transition-all"
+              className="bg-[#00B4D8] rounded-full h-3 transition-all duration-300"
               style={{ width: `${metrics.memoryUsage}%` }}
             />
           </div>
+          <p className="text-sm text-gray-400 mt-2">RAM utilization</p>
         </Card>
 
-        <Card className="p-6 bg-card border-border">
+        <Card className="p-6 bg-[#1a1a1a] border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Activity className="w-4 h-4 text-primary" />
-              API Calls (24h)
+            <h3 className="text-lg font-semibold text-white flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#00B4D8]/20">
+                <Database className="w-5 h-5 text-[#00B4D8]" />
+              </div>
+              Storage Usage
             </h3>
-            <span className="text-xl font-bold text-foreground">{metrics.apiCalls24h}</span>
+            <span className="text-2xl font-bold text-white">{metrics.storageUsage}%</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            All endpoints operating normally
-          </p>
+          <div className="w-full bg-gray-700 rounded-full h-3">
+            <div
+              className="bg-[#00B4D8] rounded-full h-3 transition-all duration-300"
+              style={{ width: `${metrics.storageUsage}%` }}
+            />
+          </div>
+          <p className="text-sm text-gray-400 mt-2">Database storage</p>
         </Card>
       </div>
 
-      {/* User Management */}
-      <Card className="p-6 bg-card border-border mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-foreground">User Management</h2>
-          <div className="flex gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-64"
-              />
-            </div>
-            <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add User
-            </Button>
+      {/* Recent Activity */}
+      <Card className="p-6 bg-[#1a1a1a] border-gray-700 mb-8">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-[#00B4D8]/20">
+            <Clock className="w-5 h-5 text-[#00B4D8]" />
           </div>
-        </div>
-        
-        <div className="space-y-3">
-          {filteredUsers.map((userData) => (
-            <div
-              key={userData.id}
-              className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border hover:bg-secondary/50 transition-colors"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <p className="font-semibold text-foreground">{userData.name}</p>
-                  <Badge variant={getRoleColor(userData.role)}>
-                    {userData.role.replace('_', ' ').toUpperCase()}
-                  </Badge>
-                  <Badge variant={userData.status === 'active' ? 'secondary' : 'outline'}>
-                    {userData.status.toUpperCase()}
-                  </Badge>
+          Recent Activity
+        </h2>
+        <div className="space-y-4">
+          {recentActivity.map((activity) => {
+            const getActivityIcon = (type: string) => {
+              switch (type) {
+                case 'user_login': return CheckCircle;
+                case 'alert_triggered': return AlertTriangle;
+                case 'system_update': return TrendingUp;
+                default: return Activity;
+              }
+            };
+
+            const getActivityColor = (severity: string) => {
+              switch (severity) {
+                case 'warning': return 'text-yellow-400';
+                case 'success': return 'text-green-400';
+                default: return 'text-[#00B4D8]';
+              }
+            };
+
+            const Icon = getActivityIcon(activity.type);
+            const timeAgo = Math.floor((Date.now() - activity.timestamp.getTime()) / (1000 * 60));
+
+            return (
+              <div key={activity.id} className="flex items-start gap-4 p-4 rounded-lg bg-[#252525] border border-gray-600">
+                <div className={`p-2 rounded-lg bg-gray-700 ${getActivityColor(activity.severity)}`}>
+                  <Icon className="w-4 h-4" />
                 </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>{userData.email}</span>
-                  <span>•</span>
-                  <span>Last login: {format(userData.lastLogin, 'MMM dd, HH:mm')}</span>
-                  <span>•</span>
-                  <span>Joined: {format(userData.createdAt, 'MMM dd, yyyy')}</span>
+                <div className="flex-1">
+                  <p className="text-white font-medium">{activity.message}</p>
+                  <p className="text-gray-400 text-sm">{timeAgo} minutes ago</p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
 
-      {/* Audit Logs */}
-      <Card className="p-6 bg-card border-border mb-6">
-        <h2 className="text-xl font-bold text-foreground mb-4">Recent Audit Logs</h2>
-        <div className="space-y-2">
-          {auditLogs.map((log) => (
-            <div
-              key={log.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border text-sm"
-            >
-              <div className="flex-1">
-                <span className="font-medium text-foreground">{log.userName}</span>
-                <span className="text-muted-foreground mx-2">•</span>
-                <span className="text-muted-foreground">{log.action.replace('_', ' ')}</span>
-                <span className="text-muted-foreground mx-2">•</span>
-                <span className="text-muted-foreground text-xs">{log.details}</span>
+      {/* Quick Actions */}
+      <Card className="p-6 bg-[#1a1a1a] border-gray-700">
+        <h2 className="text-xl font-bold text-white mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            onClick={() => navigate('users')}
+            className="p-4 rounded-lg bg-[#252525] border border-gray-600 hover:bg-[#2a2a2a] transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-[#00B4D8]/20 group-hover:bg-[#00B4D8]/30 transition-colors">
+                <Users className="w-5 h-5 text-[#00B4D8]" />
               </div>
-              <span className="text-xs text-muted-foreground">
-                {format(log.timestamp, 'MMM dd, HH:mm:ss')}
-              </span>
+              <span className="text-white font-medium">Manage Users</span>
             </div>
-          ))}
-        </div>
-      </Card>
+            <p className="text-gray-400 text-sm">Add, edit, or remove system users</p>
+          </div>
 
-      {/* System Configuration */}
-      <Card className="p-6 bg-card border-border">
-        <h2 className="text-xl font-bold text-foreground mb-4">System Configuration</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Button variant="outline" className="h-auto py-4 justify-start">
-            <Settings className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">General Settings</p>
-              <p className="text-xs text-muted-foreground">Configure system preferences</p>
+          <div
+            onClick={() => navigate('logs')}
+            className="p-4 rounded-lg bg-[#252525] border border-gray-600 hover:bg-[#2a2a2a] transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-[#00B4D8]/20 group-hover:bg-[#00B4D8]/30 transition-colors">
+                <Activity className="w-5 h-5 text-[#00B4D8]" />
+              </div>
+              <span className="text-white font-medium">View Logs</span>
             </div>
-          </Button>
-          <Button variant="outline" className="h-auto py-4 justify-start">
-            <Database className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">Database Management</p>
-              <p className="text-xs text-muted-foreground">Manage data and backups</p>
+            <p className="text-gray-400 text-sm">Monitor system activity and events</p>
+          </div>
+
+          <div
+            onClick={() => navigate('settings')}
+            className="p-4 rounded-lg bg-[#252525] border border-gray-600 hover:bg-[#2a2a2a] transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-[#00B4D8]/20 group-hover:bg-[#00B4D8]/30 transition-colors">
+                <Settings className="w-5 h-5 text-[#00B4D8]" />
+              </div>
+              <span className="text-white font-medium">System Settings</span>
             </div>
-          </Button>
-          <Button variant="outline" className="h-auto py-4 justify-start">
-            <Shield className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">Security Settings</p>
-              <p className="text-xs text-muted-foreground">Configure security policies</p>
+            <p className="text-gray-400 text-sm">Configure application parameters</p>
+          </div>
+
+          <div className="p-4 rounded-lg bg-[#252525] border border-gray-600 hover:bg-[#2a2a2a] transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-green-500/20 group-hover:bg-green-500/30 transition-colors">
+                <Shield className="w-5 h-5 text-green-400" />
+              </div>
+              <span className="text-white font-medium">Security Center</span>
             </div>
-          </Button>
-          <Button variant="outline" className="h-auto py-4 justify-start">
-            <Users className="w-5 h-5 mr-3" />
-            <div className="text-left">
-              <p className="font-semibold">Role Management</p>
-              <p className="text-xs text-muted-foreground">Manage user roles and permissions</p>
-            </div>
-          </Button>
+            <p className="text-gray-400 text-sm">Advanced security configuration</p>
+          </div>
         </div>
       </Card>
     </div>

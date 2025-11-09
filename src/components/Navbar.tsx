@@ -30,19 +30,17 @@ interface NavLinkItem {
 
 const navLinksByRole: Record<string, NavLinkItem[]> = {
   driver: [
-    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { name: "Trips", path: "/trips", icon: MapPin },
-    { name: "Alerts", path: "/alerts", icon: AlertTriangle },
-    { name: "Profile", path: "/profile", icon: User },
+    // Driver navigation is now handled within the Dashboard component
+    // No top navigation for drivers - they use bottom tabs in dashboard
   ],
-  fleet_manager: [
-    { name: "Dashboard", path: "/fleet-dashboard", icon: LayoutDashboard },
+  manager: [
+    { name: "Dashboard", path: "/dashboard/manager", icon: LayoutDashboard },
     { name: "Drivers", path: "/drivers", icon: Users },
     { name: "Analytics", path: "/analytics", icon: BarChart3 },
     { name: "Reports", path: "/reports", icon: FileText },
   ],
   admin: [
-    { name: "Dashboard", path: "/admin-dashboard", icon: LayoutDashboard },
+    { name: "Dashboard", path: "/dashboard/admin", icon: LayoutDashboard },
     { name: "Users", path: "/users", icon: Users },
     { name: "System Logs", path: "/logs", icon: Activity },
     { name: "Settings", path: "/settings", icon: Settings },
@@ -91,9 +89,9 @@ export const Navbar = () => {
 
   const handleBrandClick = () => {
     if (isAuthenticated && user?.role) {
-      if (user.role === "driver") navigate("/dashboard");
-      else if (user.role === "fleet_manager") navigate("/fleet-dashboard");
-      else if (user.role === "admin") navigate("/admin-dashboard");
+      if (user.role === "driver") navigate("/dashboard/driver");
+      else if (user.role === "manager") navigate("/dashboard/manager");
+      else if (user.role === "admin") navigate("/dashboard/admin");
     } else {
       navigate("/");
     }

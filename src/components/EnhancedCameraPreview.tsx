@@ -7,13 +7,15 @@ interface EnhancedCameraPreviewProps {
   blinkRatePerMin?: number;
   yawnsLast5m?: number;
   headPosLabel?: string;
+  showFaceMask?: boolean;
 }
 
 export const EnhancedCameraPreview = ({
   isActive = true,
   blinkRatePerMin,
   yawnsLast5m,
-  headPosLabel
+  headPosLabel,
+  showFaceMask = true
 }: EnhancedCameraPreviewProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -71,7 +73,7 @@ export const EnhancedCameraPreview = ({
 
     const connectWebSocket = () => {
       try {
-        const ws = new WebSocket('ws://localhost:8000/ws/face-mesh');
+        const ws = new WebSocket('ws://localhost:3000/ws/face-mesh');
         wsRef.current = ws;
 
         ws.onopen = () => {
@@ -197,116 +199,171 @@ export const EnhancedCameraPreview = ({
   }, [isActive]);
 
   // Separate effect for drawing face mesh overlay
-  useEffect(() => {
-    const drawFaceMesh = () => {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      if (!canvas || !video || !faceMeshData || !faceMeshData.face_mesh_points) return;
+   useEffect(() => {
+     const drawFaceMesh = () => {
+       const canvas = canvasRef.current;
+       const video = videoRef.current;
+       if (!canvas || !video || !faceMeshData) return;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+       const ctx = canvas.getContext('2d');
+       if (!ctx) return;
 
-      // Clear canvas and redraw video frame
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+       // Calculate scaling to match video display (object-cover)
+       const containerRect = video.getBoundingClientRect();
+       const containerWidth = containerRect.width;
+       const containerHeight = containerRect.height;
+       const videoWidth = video.videoWidth;
+       const videoHeight = video.videoHeight;
 
-      // Draw face mesh points
-      ctx.strokeStyle = '#00ff00';
-      ctx.lineWidth = 2;
-      ctx.fillStyle = '#00ff00';
+       if (videoWidth === 0 || videoHeight === 0) return;
 
-      // Draw key facial landmarks
-      const keyPoints = [
-        // Eyes
-        33, 133, 362, 263, // Eye corners
-        // Nose
-        1, 2, 98, 327, // Nose tip and bridge
-        // Mouth
-        61, 291, 0, 17, // Mouth corners and center
-        // Eyebrows
-        70, 63, 105, 66, 107, 336, 296, 334, 293, 300 // Eyebrow points
-      ];
+       const scaleX = containerWidth / videoWidth;
+       const scaleY = containerHeight / videoHeight;
+       const scale = Math.max(scaleX, scaleY); // object-cover scaling
+       const offsetX = (containerWidth - videoWidth * scale) / 2;
+       const offsetY = (containerHeight - videoHeight * scale) / 2;
 
-      keyPoints.forEach((idx) => {
-        if (faceMeshData.face_mesh_points[idx]) {
-          const point = faceMeshData.face_mesh_points[idx];
-          ctx.beginPath();
-          ctx.arc(point[0], point[1], 3, 0, 2 * Math.PI);
-          ctx.fill();
-        }
-      });
+       // Set canvas size to displayed size
+       canvas.width = containerWidth;
+       canvas.height = containerHeight;
 
-      // Draw face outline
-      ctx.strokeStyle = '#00ff00';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      const outlinePoints = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
-      outlinePoints.forEach((idx, i) => {
-        if (faceMeshData.face_mesh_points[idx]) {
-          const point = faceMeshData.face_mesh_points[idx];
-          if (i === 0) {
-            ctx.moveTo(point[0], point[1]);
-          } else {
-            ctx.lineTo(point[0], point[1]);
-          }
-        }
-      });
-      ctx.closePath();
-      ctx.stroke();
+       // Clear canvas (transparent overlay)
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw eye contours
-      ctx.strokeStyle = '#ffff00';
-      ctx.lineWidth = 1;
+       if (showFaceMask && faceMeshData.face_mask_points && faceMeshData.face_mask_points.length > 0) {
+         // Draw face mask overlay
+         ctx.fillStyle = 'rgba(0, 255, 0, 0.3)'; // Semi-transparent green
+         ctx.strokeStyle = '#00ff00';
+         ctx.lineWidth = 3;
 
-      // Left eye
-      ctx.beginPath();
-      [33, 160, 158, 133, 153, 144].forEach((idx, i) => {
-        if (faceMeshData.face_mesh_points[idx]) {
-          const point = faceMeshData.face_mesh_points[idx];
-          if (i === 0) {
-            ctx.moveTo(point[0], point[1]);
-          } else {
-            ctx.lineTo(point[0], point[1]);
-          }
-        }
-      });
-      ctx.closePath();
-      ctx.stroke();
+         ctx.beginPath();
+         faceMeshData.face_mask_points.forEach((point, i) => {
+           const x = offsetX + point[0] * scale;
+           const y = offsetY + point[1] * scale;
+           if (i === 0) {
+             ctx.moveTo(x, y);
+           } else {
+             ctx.lineTo(x, y);
+           }
+         });
+         ctx.closePath();
+         ctx.fill();
+         ctx.stroke();
 
-      // Right eye
-      ctx.beginPath();
-      [362, 385, 387, 263, 373, 380].forEach((idx, i) => {
-        if (faceMeshData.face_mesh_points[idx]) {
-          const point = faceMeshData.face_mesh_points[idx];
-          if (i === 0) {
-            ctx.moveTo(point[0], point[1]);
-          } else {
-            ctx.lineTo(point[0], point[1]);
-          }
-        }
-      });
-      ctx.closePath();
-      ctx.stroke();
+         // Draw mask border with glow effect
+         ctx.shadowColor = '#00ff00';
+         ctx.shadowBlur = 10;
+         ctx.stroke();
+         ctx.shadowBlur = 0; // Reset shadow
+       } else if (faceMeshData.face_mesh_points) {
+         // Draw traditional face mesh landmarks
+         ctx.strokeStyle = '#00ff00';
+         ctx.lineWidth = 2;
+         ctx.fillStyle = '#00ff00';
 
-      // Draw mouth contour
-      ctx.strokeStyle = '#ff0000';
-      ctx.beginPath();
-      [61, 291, 0, 17, 57, 287].forEach((idx, i) => {
-        if (faceMeshData.face_mesh_points[idx]) {
-          const point = faceMeshData.face_mesh_points[idx];
-          if (i === 0) {
-            ctx.moveTo(point[0], point[1]);
-          } else {
-            ctx.lineTo(point[0], point[1]);
-          }
-        }
-      });
-      ctx.closePath();
-      ctx.stroke();
-    };
+         // Draw key facial landmarks
+         const keyPoints = [
+           // Eyes
+           33, 133, 362, 263, // Eye corners
+           // Nose
+           1, 2, 98, 327, // Nose tip and bridge
+           // Mouth
+           61, 291, 0, 17, // Mouth corners and center
+           // Eyebrows
+           70, 63, 105, 66, 107, 336, 296, 334, 293, 300 // Eyebrow points
+         ];
 
-    drawFaceMesh();
-  }, [faceMeshData]);
+         keyPoints.forEach((idx) => {
+           if (faceMeshData.face_mesh_points[idx]) {
+             const point = faceMeshData.face_mesh_points[idx];
+             const x = offsetX + point[0] * scale;
+             const y = offsetY + point[1] * scale;
+             ctx.beginPath();
+             ctx.arc(x, y, 3, 0, 2 * Math.PI);
+             ctx.fill();
+           }
+         });
+
+         // Draw face outline
+         ctx.strokeStyle = '#00ff00';
+         ctx.lineWidth = 2;
+         ctx.beginPath();
+         const outlinePoints = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+         outlinePoints.forEach((idx, i) => {
+           if (faceMeshData.face_mesh_points[idx]) {
+             const point = faceMeshData.face_mesh_points[idx];
+             const x = offsetX + point[0] * scale;
+             const y = offsetY + point[1] * scale;
+             if (i === 0) {
+               ctx.moveTo(x, y);
+             } else {
+               ctx.lineTo(x, y);
+             }
+           }
+         });
+         ctx.closePath();
+         ctx.stroke();
+
+         // Draw eye contours
+         ctx.strokeStyle = '#ffff00';
+         ctx.lineWidth = 1;
+
+         // Left eye
+         ctx.beginPath();
+         [33, 160, 158, 133, 153, 144].forEach((idx, i) => {
+           if (faceMeshData.face_mesh_points[idx]) {
+             const point = faceMeshData.face_mesh_points[idx];
+             const x = offsetX + point[0] * scale;
+             const y = offsetY + point[1] * scale;
+             if (i === 0) {
+               ctx.moveTo(x, y);
+             } else {
+               ctx.lineTo(x, y);
+             }
+           }
+         });
+         ctx.closePath();
+         ctx.stroke();
+
+         // Right eye
+         ctx.beginPath();
+         [362, 385, 387, 263, 373, 380].forEach((idx, i) => {
+           if (faceMeshData.face_mesh_points[idx]) {
+             const point = faceMeshData.face_mesh_points[idx];
+             const x = offsetX + point[0] * scale;
+             const y = offsetY + point[1] * scale;
+             if (i === 0) {
+               ctx.moveTo(x, y);
+             } else {
+               ctx.lineTo(x, y);
+             }
+           }
+         });
+         ctx.closePath();
+         ctx.stroke();
+
+         // Draw mouth contour
+         ctx.strokeStyle = '#ff0000';
+         ctx.beginPath();
+         [61, 291, 0, 17, 57, 287].forEach((idx, i) => {
+           if (faceMeshData.face_mesh_points[idx]) {
+             const point = faceMeshData.face_mesh_points[idx];
+             const x = offsetX + point[0] * scale;
+             const y = offsetY + point[1] * scale;
+             if (i === 0) {
+               ctx.moveTo(x, y);
+             } else {
+               ctx.lineTo(x, y);
+             }
+           }
+         });
+         ctx.closePath();
+         ctx.stroke();
+       }
+     };
+
+     drawFaceMesh();
+   }, [faceMeshData, showFaceMask]);
 
   const getStatusIcon = () => {
     switch (status) {
@@ -346,21 +403,11 @@ export const EnhancedCameraPreview = ({
               autoPlay
               playsInline
               muted
-              style={{ display: 'none' }}
             />
             <canvas
               ref={canvasRef}
               className="absolute inset-0 w-full h-full"
               style={{ pointerEvents: 'none' }}
-            />
-            {/* Hidden video element for processing */}
-            <video
-              ref={videoRef}
-              className="absolute inset-0 w-full h-full object-cover"
-              autoPlay
-              playsInline
-              muted
-              style={{ display: 'none' }}
             />
             {/* Debug info */}
             <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs p-1 rounded">
@@ -409,6 +456,28 @@ export const EnhancedCameraPreview = ({
                   </span>
                 </div>
               </div>
+              {faceMeshData?.head_pose && (
+                <div className="grid grid-cols-3 gap-2 text-xs mt-2 pt-2 border-t border-border">
+                  <div>
+                    <span className="text-muted-foreground">Yaw:</span>
+                    <span className="ml-2 text-foreground font-medium">
+                      {faceMeshData.head_pose.yaw?.toFixed(2) ?? '0.00'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Pitch:</span>
+                    <span className="ml-2 text-foreground font-medium">
+                      {faceMeshData.head_pose.pitch?.toFixed(2) ?? '0.00'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Roll:</span>
+                    <span className="ml-2 text-foreground font-medium">
+                      {faceMeshData.head_pose.roll?.toFixed(1) ?? '0.0'}°
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         ) : (

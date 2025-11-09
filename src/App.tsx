@@ -13,7 +13,11 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import FleetDashboard from "./pages/FleetDashboard";
+import AdminLayout from "./components/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminLogs from "./pages/AdminLogs";
+import AdminSettings from "./pages/AdminSettings";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -41,7 +45,12 @@ const App = () => (
                       <Dashboard />
                     </ProtectedRoute>
                   }
-                />
+                >
+                  <Route path="trips" element={<Dashboard />} />
+                  <Route path="alerts" element={<Dashboard />} />
+                  <Route path="dashcam" element={<Dashboard />} />
+                  <Route path="profile" element={<Dashboard />} />
+                </Route>
                 <Route
                   path="/dashboard/manager"
                   element={
@@ -54,10 +63,15 @@ const App = () => (
                   path="/dashboard/admin"
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboard />
+                      <AdminLayout />
                     </ProtectedRoute>
                   }
-                />
+                >
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="logs" element={<AdminLogs />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
